@@ -7,36 +7,34 @@
   <meta name="description" content="Host live, real-time quizzes for your team or classroom. Create questions, share a session code, and watch participants compete in real time." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <!-- Static weights only — no opsz axis, prevents font stretching -->
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-stretch: normal; /* prevent any inherited variable-font stretch */
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #080c18;
-      --surface: #0f1525;
-      --surface2: #161d33;
-      --border: rgba(255,255,255,0.08);
-      --accent: #c8ff47;
-      --accent-dim: rgba(200,255,71,0.11);
-      --text: #eef0f7;
-      --muted: #7a8099;
+      --stage: #2a0d61;
+      --ink: #241243;
+      --card: #ffffff;
+      --card-soft: #f3edff;
+      --card-muted: #7a6a9e;
+      --accent: #ffd028;
+      --pop: #ff4fa0;
+      --violet: #7a3ff2;
+      --text: #ffffff;
+      --muted: #c9b8f2;
+      --led-muted: #9d86d8;
+      --display: 'Baloo 2', ui-rounded, system-ui, sans-serif;
+      --body: 'Nunito', ui-rounded, system-ui, sans-serif;
+      --mono: 'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace;
     }
 
     html { scroll-behavior: smooth; }
 
     body {
-      background: var(--bg);
+      background: var(--stage);
       color: var(--text);
-      font-family: 'DM Sans', sans-serif;
+      font-family: var(--body);
       font-size: 16px;
-      font-weight: 400;
-      font-stretch: normal;
       line-height: 1.65;
       min-height: 100vh;
       overflow-x: hidden;
@@ -44,575 +42,663 @@
       -moz-osx-font-smoothing: grayscale;
     }
 
-    /* grid background */
-    body::after {
+    /* stage spotlight */
+    body::before {
       content: '';
       position: fixed;
       inset: 0;
-      background-image:
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 60px 60px;
       pointer-events: none;
+      background: radial-gradient(ellipse 70% 42% at 50% 4%, rgba(255,208,40,0.16), transparent 70%);
       z-index: 0;
     }
 
-    /* ── NAV ── */
+    ::selection { background: rgba(255,208,40,0.4); color: var(--ink); }
+
+    a { color: inherit; }
+    button { font: inherit; cursor: pointer; }
+    a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+    main { position: relative; z-index: 1; }
+
+    /* ── NAV: theatre marquee ── */
     nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
+      position: sticky;
+      top: 0;
       z-index: 100;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 1rem;
       padding: 0.875rem 2rem;
-      background: rgba(8,12,24,0.88);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border);
+      background: var(--ink);
+      border-bottom: 4px solid var(--accent);
     }
+    nav::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: -14px;
+      height: 10px;
+      pointer-events: none;
+      background-image: radial-gradient(circle at 5px 5px, var(--accent) 3px, transparent 3.6px);
+      background-size: 26px 10px;
+      animation: chase 0.9s steps(2) infinite;
+    }
+    @keyframes chase { to { background-position-x: 26px; } }
 
     .logo {
-      font-family: 'Syne', sans-serif;
+      font-family: var(--display);
       font-weight: 800;
-      font-size: 1.2rem;
-      letter-spacing: -0.02em;
+      font-size: 1.25rem;
       color: var(--text);
       text-decoration: none;
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
-
     .logo-dot {
-      width: 7px; height: 7px;
+      width: 9px; height: 9px;
       border-radius: 50%;
       background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(255,208,40,0.25);
       animation: blink 2s ease-in-out infinite;
     }
+    @keyframes blink { 50% { opacity: 0.4; } }
 
-    @keyframes blink {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.45; transform: scale(0.75); }
-    }
-
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .nav-github {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      color: var(--muted);
-      font-size: 0.8125rem;
-      font-weight: 500;
-      text-decoration: none;
-      padding: 0.45rem 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      transition: color 0.2s, border-color 0.2s;
-    }
-    .nav-github:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
-    .nav-github svg { flex-shrink: 0; }
+    .nav-right { display: flex; align-items: center; gap: 0.875rem; }
+    .nav-links { display: flex; gap: 1.375rem; }
+    .nav-links a { font-size: 0.8125rem; font-weight: 700; text-decoration: none; color: var(--muted); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
 
     .nav-cta {
-      font-size: 0.8125rem;
-      font-weight: 600;
-      color: #080c00;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink);
       background: var(--accent);
-      border: none;
-      padding: 0.5rem 1.1rem;
-      border-radius: 6px;
+      border: 3px solid var(--ink);
+      border-radius: 9px;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.55);
+      padding: 0.45rem 1rem;
       text-decoration: none;
-      transition: opacity 0.2s, transform 0.15s;
-      cursor: pointer;
       white-space: nowrap;
+      transition: transform 0.12s, box-shadow 0.12s;
     }
-    .nav-cta:hover { opacity: 0.85; transform: translateY(-1px); }
-
-    main { position: relative; z-index: 1; }
+    .nav-cta:hover { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.55); }
 
     /* ── HERO ── */
     .hero {
-      min-height: 100vh;
+      padding: 5.5rem 2rem 4.5rem;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       text-align: center;
-      padding: 7rem 1.5rem 4rem;
     }
-
     .hero-badge {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      background: var(--accent-dim);
-      border: 1px solid rgba(200,255,71,0.22);
-      color: var(--accent);
-      font-family: 'DM Mono', monospace;
+      font-family: var(--mono);
       font-size: 0.72rem;
+      font-weight: 500;
       letter-spacing: 0.09em;
-      padding: 0.3rem 0.875rem;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 3px dashed var(--accent);
       border-radius: 100px;
-      margin-bottom: 2.5rem;
-      opacity: 0;
-      animation: fadeUp 0.6s 0.1s ease forwards;
+      padding: 0.3rem 0.9rem;
+      margin-bottom: 2rem;
     }
-
     .badge-dot {
-      width: 5px; height: 5px;
+      width: 6px; height: 6px;
       border-radius: 50%;
-      background: var(--accent);
-      animation: blink 1.5s ease-in-out infinite;
+      background: currentColor;
+      animation: blink 1.6s ease-in-out infinite;
     }
 
     h1 {
-      font-family: 'Syne', sans-serif;
+      font-family: var(--display);
       font-weight: 800;
-      font-size: clamp(2.75rem, 7.5vw, 5.5rem);
+      font-size: clamp(2.6rem, 6.5vw, 4.8rem);
       line-height: 1.04;
-      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
       max-width: 760px;
-      opacity: 0;
-      animation: fadeUp 0.7s 0.25s ease forwards;
+      text-wrap: balance;
+      text-shadow: 0 5px 0 rgba(0,0,0,0.28);
     }
-
     h1 em {
       font-style: normal;
       color: var(--accent);
+      text-shadow: 0 0 34px rgba(255,208,40,0.55), 0 5px 0 rgba(0,0,0,0.28);
     }
 
     .hero-sub {
-      margin-top: 1.5rem;
+      margin-top: 1.375rem;
       font-size: 1.0625rem;
-      font-weight: 400;
+      font-weight: 600;
       color: var(--muted);
-      max-width: 480px;
-      line-height: 1.72;
-      opacity: 0;
-      animation: fadeUp 0.7s 0.4s ease forwards;
+      max-width: 470px;
+      line-height: 1.7;
     }
 
     .hero-actions {
-      margin-top: 2.5rem;
+      margin-top: 2.25rem;
       display: flex;
       align-items: center;
       gap: 0.875rem;
       flex-wrap: wrap;
       justify-content: center;
-      opacity: 0;
-      animation: fadeUp 0.7s 0.55s ease forwards;
     }
-
     .btn-primary {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
       background: var(--accent);
-      color: #080c00;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 600;
-      font-size: 0.9375rem;
-      padding: 0.8rem 1.75rem;
-      border-radius: 8px;
+      color: var(--ink);
+      font-weight: 800;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.85rem 1.7rem;
+      border: 3px solid var(--ink);
+      border-radius: 9px;
+      box-shadow: 0 6px 0 var(--ink);
       text-decoration: none;
-      border: none;
-      cursor: pointer;
-      transition: transform 0.18s, box-shadow 0.18s;
+      transition: transform 0.12s, box-shadow 0.12s;
     }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 28px rgba(200,255,71,0.28);
-    }
-    .btn-primary svg { transition: transform 0.2s; }
-    .btn-primary:hover svg { transform: translateX(3px); }
-
+    .btn-primary:hover { transform: translateY(3px); box-shadow: 0 3px 0 var(--ink); }
     .btn-ghost {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      color: var(--muted);
-      font-size: 0.9rem;
-      font-weight: 400;
+      color: var(--text);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: 3px solid rgba(255,255,255,0.35);
+      border-radius: 9px;
+      padding: 0.85rem 1.25rem;
       text-decoration: none;
-      padding: 0.8rem 0.875rem;
-      border-radius: 8px;
-      transition: color 0.2s;
+      transition: transform 0.12s, border-color 0.2s;
     }
-    .btn-ghost:hover { color: var(--text); }
+    .btn-ghost:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.6); }
 
-    .hero-github {
-      margin-top: 1.75rem;
-      opacity: 0;
-      animation: fadeUp 0.7s 0.7s ease forwards;
-    }
-
-    .hero-github a {
+    .hero-gh { margin-top: 2rem; font-family: var(--mono); font-size: 0.8rem; }
+    .hero-gh a {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
       color: var(--muted);
-      font-size: 0.8125rem;
-      font-family: 'DM Mono', monospace;
       text-decoration: none;
       transition: color 0.2s;
     }
-    .hero-github a:hover { color: var(--text); }
-    .hero-github svg { opacity: 0.6; }
-    .hero-github a:hover svg { opacity: 1; }
+    .hero-gh a:hover { color: var(--text); }
+    .hero-gh svg { opacity: 0.7; }
 
-    .hero-scroll {
-      margin-top: 4rem;
-      opacity: 0;
-      animation: fadeUp 0.7s 0.9s ease forwards;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.45rem;
+    /* ── QUIZ BOARD MOCKUP ── */
+    .hero-visual {
+      margin-top: 3.5rem;
+      width: 100%;
+      max-width: 760px;
+      position: relative;
     }
-    .scroll-label {
-      color: var(--muted);
-      font-size: 0.7rem;
-      font-family: 'DM Mono', monospace;
-      letter-spacing: 0.12em;
-    }
-    .scroll-line {
-      width: 1px; height: 32px;
-      background: linear-gradient(to bottom, var(--accent), transparent);
-      animation: scrollAnim 1.8s ease-in-out infinite;
-    }
-    @keyframes scrollAnim {
-      0%   { transform: scaleY(0); transform-origin: top; opacity: 0; }
-      30%  { transform: scaleY(1); transform-origin: top; opacity: 1; }
-      70%  { transform: scaleY(1); transform-origin: bottom; opacity: 1; }
-      100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── SECTION COMMON ── */
-    .section {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 5rem 1.5rem;
-    }
-
-    .section-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 0.72rem;
-      letter-spacing: 0.13em;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 0.875rem;
-    }
-
-    .section-title {
-      font-family: 'Syne', sans-serif;
+    /* floating stickers */
+    .hero-visual::before {
+      content: '+250 pts!';
+      position: absolute;
+      top: -1.4rem; right: 6%;
+      z-index: 2;
+      background: var(--pop);
+      color: #fff;
+      font-family: var(--display);
       font-weight: 800;
-      font-size: clamp(1.625rem, 3.5vw, 2.5rem);
-      line-height: 1.12;
-      letter-spacing: -0.025em;
-      margin-bottom: 0.875rem;
-    }
-
-    .section-sub {
-      font-size: 0.9375rem;
-      font-weight: 400;
-      color: var(--muted);
-      max-width: 480px;
-      line-height: 1.7;
-      margin-bottom: 2.75rem;
-    }
-
-    /* ── HOW IT WORKS ── */
-    .steps-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
-      gap: 1rem;
-    }
-
-    .step-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.625rem 1.375rem;
-      position: relative;
-      overflow: hidden;
-      transition: border-color 0.2s, transform 0.22s;
-    }
-    .step-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: var(--accent);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.3s ease;
-    }
-    .step-card:hover { border-color: rgba(200,255,71,0.2); transform: translateY(-3px); }
-    .step-card:hover::before { transform: scaleX(1); }
-
-    .step-num {
-      font-family: 'DM Mono', monospace;
-      font-size: 0.7rem;
-      color: var(--accent);
-      opacity: 0.65;
-      margin-bottom: 0.875rem;
-    }
-
-    .step-icon {
-      width: 38px; height: 38px;
-      background: var(--accent-dim);
-      border-radius: 9px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem;
-      margin-bottom: 1.125rem;
-    }
-
-    .step-card h3 {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 0.9375rem;
-      letter-spacing: -0.01em;
-      margin-bottom: 0.45rem;
-    }
-
-    .step-card p {
-      font-size: 0.84rem;
-      font-weight: 400;
-      color: var(--muted);
-      line-height: 1.65;
-    }
-
-    /* ── ACCESS ── */
-    .access-section {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 5rem 1.5rem;
-      position: relative;
-      z-index: 1;
-    }
-    .access-inner { max-width: 900px; margin: 0 auto; }
-
-    .access-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-      gap: 1.375rem;
-    }
-
-    .access-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.875rem;
-      position: relative;
-    }
-    .access-card.featured { border-color: rgba(200,255,71,0.28); }
-    .access-card.featured::after {
-      content: 'Admin';
-      position: absolute;
-      top: 1.125rem; right: 1.125rem;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.68rem;
-      letter-spacing: 0.08em;
-      color: var(--accent);
-      background: var(--accent-dim);
-      border: 1px solid rgba(200,255,71,0.22);
+      font-size: 0.85rem;
+      padding: 0.4rem 0.95rem;
       border-radius: 100px;
-      padding: 0.2rem 0.6rem;
+      border: 3px solid var(--ink);
+      box-shadow: 0 5px 0 var(--ink);
+      transform: rotate(7deg);
+      animation: floaty 3.2s ease-in-out infinite;
     }
+    .hero-visual::after {
+      content: '★';
+      position: absolute;
+      bottom: -1.1rem; left: -1.1rem;
+      z-index: 2;
+      width: 56px; height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent);
+      color: var(--ink);
+      font-size: 1.5rem;
+      border-radius: 50%;
+      border: 3px solid var(--ink);
+      box-shadow: 0 5px 0 var(--ink);
+      transform: rotate(-9deg);
+      animation: floaty 4.1s 0.6s ease-in-out infinite;
+    }
+    @keyframes floaty { 0%, 100% { translate: 0 0; } 50% { translate: 0 -9px; } }
 
-    .card-icon {
-      width: 44px; height: 44px;
-      border-radius: 11px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.375rem;
-      margin-bottom: 1.125rem;
+    .mockup {
+      text-align: left;
+      overflow: hidden;
+      background: var(--card);
+      color: var(--ink);
+      border: 6px solid var(--ink);
+      border-radius: 14px;
+      box-shadow: 0 0 0 3px var(--accent), 0 12px 0 var(--ink), 0 40px 80px rgba(0,0,0,0.5);
     }
-    .card-icon.green { background: var(--accent-dim); }
-    .card-icon.gray  { background: var(--surface2); }
-
-    .access-card h3 {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 1.0625rem;
-      letter-spacing: -0.015em;
-      margin-bottom: 0.45rem;
-    }
-    .access-card > p {
-      font-size: 0.875rem;
-      font-weight: 400;
-      color: var(--muted);
-      line-height: 1.65;
-      margin-bottom: 1.375rem;
-    }
-
-    .code-block {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.8rem 1rem;
+    .mockup-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.7rem 1.125rem;
+      background: var(--accent);
+      border-bottom: 4px solid var(--ink);
+    }
+    .mockup-dots { display: flex; gap: 6px; }
+    .mockup-dots span { width: 9px; height: 9px; border-radius: 50%; background: var(--ink); }
+    .mockup-session { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; color: var(--ink); }
+    .mockup-session b { letter-spacing: 0.18em; font-weight: 500; }
+    .live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      background: var(--pop);
+      color: #fff;
+      border-radius: 100px;
+      padding: 0.15rem 0.6rem;
+    }
+    .live-pill::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: blink 1.4s ease-in-out infinite;
+    }
+
+    .mockup-body { display: grid; grid-template-columns: 1.35fr 1fr; }
+
+    .mockup-question { padding: 1.5rem 1.625rem; }
+    .mockup-qlabel {
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.12em;
+      color: var(--card-muted);
+      text-transform: uppercase;
+      margin-bottom: 0.7rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .mockup-timer {
+      background: var(--ink);
+      color: var(--accent);
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      padding: 0.1rem 0.55rem;
+      border-radius: 5px;
+      text-shadow: 0 0 10px rgba(255,208,40,0.8);
+    }
+    .mockup-question h4 {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 1.05rem;
+      line-height: 1.35;
+      margin-bottom: 1.125rem;
+    }
+    .mockup-options { display: flex; flex-direction: column; gap: 0.55rem; }
+    .mockup-option {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      background: var(--card-soft);
+      border: 2px solid transparent;
+      border-radius: 10px;
+      padding: 0.6rem 0.875rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .mockup-option .key {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      width: 20px; height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: var(--ink);
+      color: #fff;
+      border-radius: 5px;
+    }
+    .mockup-option.selected { background: var(--accent); border-color: var(--ink); }
+    .mockup-option.selected .key { background: var(--ink); color: var(--accent); }
+
+    /* LED leaderboard panel */
+    .mockup-board { padding: 1.5rem 1.625rem; background: var(--ink); }
+    .mockup-board-title {
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.12em;
+      color: var(--led-muted);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .board-row {
+      display: grid;
+      grid-template-columns: 20px 1fr auto;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.8rem;
+    }
+    .board-rank {
+      width: 19px; height: 19px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      font-weight: 500;
+      color: var(--ink);
+      background: rgba(255,255,255,0.14);
+    }
+    .board-row:not(.gold):not(.silver):not(.bronze) .board-rank { color: var(--muted); }
+    .board-row.gold   .board-rank { background: linear-gradient(160deg, #ffe37a, #ffc61a); }
+    .board-row.silver .board-rank { background: linear-gradient(160deg, #eceaf6, #c9c4dd); }
+    .board-row.bronze .board-rank { background: linear-gradient(160deg, #f3c093, #dd9354); }
+    .board-name { font-size: 0.8rem; font-weight: 800; color: #fff; }
+    .board-score {
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 12px rgba(255,208,40,0.7);
+    }
+    .board-row.gold .board-score { color: var(--pop); text-shadow: 0 0 12px rgba(255,79,160,0.8); }
+    .board-bar { grid-column: 2 / 4; height: 9px; background: rgba(255,255,255,0.12); border-radius: 2px; overflow: hidden; }
+    .board-bar i {
+      display: block;
+      height: 100%;
+      background: repeating-linear-gradient(90deg, var(--accent) 0 7px, transparent 7px 10px);
+      transform-origin: left;
+      animation: growBar 1s 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .board-row.gold .board-bar i { background: repeating-linear-gradient(90deg, var(--pop) 0 7px, transparent 7px 10px); }
+    .board-row:nth-of-type(3) .board-bar i { animation-delay: 0.55s; }
+    .board-row:nth-of-type(4) .board-bar i { animation-delay: 0.7s; }
+    .board-row:nth-of-type(5) .board-bar i { animation-delay: 0.85s; }
+    @keyframes growBar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+    /* ── FEATURE STRIP ── */
+    .features { padding: 4.5rem 2rem 0; }
+    .features-inner {
+      max-width: 940px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .feature {
+      padding: 1.375rem 1.5rem;
+      background: rgba(0,0,0,0.28);
+      border: 2px solid rgba(255,208,40,0.35);
+      border-radius: 12px;
+    }
+    .feature svg { color: var(--accent); margin-bottom: 0.55rem; }
+    .feature h4 {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.3rem;
+    }
+    .feature p { font-size: 0.78rem; font-weight: 600; color: var(--muted); line-height: 1.55; }
+
+    /* ── SECTIONS ── */
+    .section { padding: 5.5rem 2rem; }
+    .section-inner { max-width: 940px; margin: 0 auto; }
+    .section-label {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: var(--ink);
+      border: 2px dashed var(--ink);
+      padding: 0.25rem 0.8rem;
+      transform: rotate(-1.5deg);
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+      line-height: 1.12;
+      text-transform: uppercase;
+      text-shadow: 0 4px 0 rgba(0,0,0,0.25);
+      margin-bottom: 0.75rem;
+      text-wrap: balance;
+    }
+    .section-sub { font-size: 0.9375rem; font-weight: 600; color: var(--muted); max-width: 480px; line-height: 1.7; margin-bottom: 2.5rem; }
+
+    /* ── HOW IT WORKS ── */
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .step {
+      padding: 1.625rem 1.375rem;
+      background: var(--card);
+      color: var(--ink);
+      border: 3px dashed var(--ink);
+      border-radius: 12px;
+      box-shadow: 6px 6px 0 rgba(0,0,0,0.35);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .step:hover { transform: translate(-2px, -2px); box-shadow: 9px 9px 0 rgba(0,0,0,0.35); }
+    .step-num {
+      font-family: var(--display);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--pop);
+      line-height: 1;
+      margin-bottom: 0.875rem;
+    }
+    .step-icon {
+      width: 40px; height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--card-soft);
+      border-radius: 50%;
+      color: var(--violet);
+      margin-bottom: 1.125rem;
+    }
+    .step h3 { font-family: var(--display); font-weight: 800; font-size: 0.9375rem; margin-bottom: 0.45rem; }
+    .step p { font-size: 0.84rem; font-weight: 600; color: var(--card-muted); line-height: 1.62; }
+
+    /* ── ACCESS ── */
+    .access-section {
+      background: rgba(0,0,0,0.22);
+      border-top: 4px solid var(--accent);
+      border-bottom: 4px solid var(--accent);
+    }
+    .access-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.375rem; }
+    .access-card {
+      padding: 1.875rem;
+      position: relative;
+      background: var(--card);
+      color: var(--ink);
+      border: 4px solid var(--ink);
+      border-radius: 14px;
+      box-shadow: 0 8px 0 var(--ink);
+    }
+    .access-card.featured { border-color: var(--pop); box-shadow: 0 8px 0 var(--pop); }
+    .access-tag {
+      position: absolute;
+      top: 1.125rem; right: 1.125rem;
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      background: var(--pop);
+      color: #fff;
+      border-radius: 100px;
+      padding: 0.2rem 0.6rem;
+    }
+    .card-icon {
+      width: 44px; height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--card-soft);
+      border-radius: 50%;
+      color: var(--violet);
+      margin-bottom: 1.125rem;
+    }
+    .access-card h3 { font-family: var(--display); font-weight: 800; font-size: 1.0625rem; margin-bottom: 0.45rem; }
+    .access-card > p { font-size: 0.875rem; font-weight: 600; color: var(--card-muted); line-height: 1.65; margin-bottom: 1.375rem; }
+
+    /* LED access-code block */
+    .code-block {
+      background: var(--ink);
+      border-radius: 12px;
+      padding: 0.8rem 1.125rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
       margin-bottom: 1.125rem;
     }
     .code-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 0.68rem;
-      color: var(--muted);
-      margin-bottom: 0.2rem;
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      color: var(--led-muted);
       letter-spacing: 0.07em;
       text-transform: uppercase;
     }
     .code-value {
-      font-family: 'DM Mono', monospace;
-      font-size: 1.625rem;
+      font-family: var(--mono);
+      font-size: 1.55rem;
       font-weight: 500;
       color: var(--accent);
-      letter-spacing: 0.22em;
+      letter-spacing: 0.3em;
+      text-shadow: 0 0 16px rgba(255,208,40,0.8);
     }
-
+    .code-url { font-family: var(--mono); font-size: 0.84rem; color: #fff; margin-top: 3px; }
     .copy-btn {
       background: none;
-      border: 1px solid var(--border);
-      color: var(--muted);
+      border: 2px solid #4a3580;
+      border-radius: 7px;
+      color: #cbbfe8;
+      font-size: 0.78rem;
+      font-weight: 700;
       padding: 0.375rem 0.8rem;
+      white-space: nowrap;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .copy-btn:hover { color: #fff; border-color: var(--led-muted); }
+    .copy-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+    .card-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      width: 100%;
+      font-weight: 800;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.85rem 1.25rem;
+      border-radius: 9px;
+      text-decoration: none;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+    .card-btn.primary {
+      background: var(--accent);
+      color: var(--ink);
+      border: 3px solid var(--ink);
+      box-shadow: 0 5px 0 var(--ink);
+    }
+    .card-btn.primary:hover { transform: translateY(2px); box-shadow: 0 3px 0 var(--ink); }
+    .card-btn.secondary {
+      background: var(--card-soft);
+      color: var(--ink);
+      border: 3px solid var(--ink);
+    }
+    .card-btn.secondary:hover { transform: translateY(-2px); }
+
+    .checklist { list-style: none; margin-top: 1.375rem; display: flex; flex-direction: column; gap: 0.6rem; }
+    .checklist li { display: flex; gap: 0.55rem; font-size: 0.84rem; font-weight: 600; color: var(--card-muted); line-height: 1.6; }
+    .checklist .tick { color: var(--pop); flex-shrink: 0; font-weight: 800; }
+    .checklist strong { color: var(--ink); font-weight: 800; }
+    .checklist code {
+      font-family: var(--mono);
+      background: var(--card-soft);
+      color: var(--pop);
+      padding: 0.05rem 0.35rem;
       border-radius: 6px;
       font-size: 0.8rem;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 400;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s, border-color 0.2s;
-      white-space: nowrap;
-    }
-    .copy-btn:hover { background: var(--surface2); color: var(--text); border-color: rgba(255,255,255,0.15); }
-    .copy-btn.copied { color: var(--accent); border-color: rgba(200,255,71,0.3); }
-
-    .launch-btn {
-      display: flex; align-items: center; justify-content: center; gap: 0.45rem;
-      width: 100%;
-      background: var(--accent);
-      color: #080c00;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 600;
-      font-size: 0.9rem;
-      padding: 0.8rem 1.25rem;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: opacity 0.2s, transform 0.18s, box-shadow 0.18s;
-    }
-    .launch-btn:hover { opacity: 0.88; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(200,255,71,0.2); }
-    .launch-btn svg { transition: transform 0.2s; }
-    .launch-btn:hover svg { transform: translateX(2px); }
-
-    .join-btn {
-      display: flex; align-items: center; justify-content: center; gap: 0.45rem;
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 500;
-      font-size: 0.9rem;
-      padding: 0.8rem 1.25rem;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: border-color 0.2s, transform 0.18s;
-    }
-    .join-btn:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
-
-    .checklist {
-      list-style: none;
-      margin-top: 1.375rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-    .checklist li {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.55rem;
-      font-size: 0.84rem;
-      font-weight: 400;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-    .checklist li .check { color: var(--accent); flex-shrink: 0; }
-    .checklist li .arr   { color: var(--muted);  flex-shrink: 0; }
-    .checklist code {
-      font-family: 'DM Mono', monospace;
-      color: var(--accent);
-      background: var(--accent-dim);
-      padding: 0.1rem 0.35rem;
-      border-radius: 4px;
-      font-size: 0.82rem;
     }
 
-    /* ── GITHUB SECTION ── */
-    .github-section {
-      position: relative;
-      z-index: 1;
-    }
-    .github-inner {
-      max-width: 900px;
+    /* ── GITHUB CALLOUT ── */
+    .gh-callout { margin: 3.5rem 2rem 0; }
+    .gh-inner {
+      max-width: 940px;
       margin: 0 auto;
-      padding: 3.5rem 1.5rem;
+      padding: 2.25rem 2rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1.5rem;
       flex-wrap: wrap;
+      background: var(--ink);
+      border: 3px dashed var(--accent);
+      border-radius: 14px;
     }
-    .github-text h3 {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 1.125rem;
-      letter-spacing: -0.015em;
-      margin-bottom: 0.35rem;
-    }
-    .github-text p {
-      font-size: 0.875rem;
-      font-weight: 400;
-      color: var(--muted);
-    }
-    .github-link {
+    .gh-inner h3 { font-family: var(--display); font-weight: 800; font-size: 1.125rem; margin-bottom: 0.3rem; }
+    .gh-inner p { font-size: 0.875rem; font-weight: 600; color: var(--muted); }
+    .gh-link {
       display: inline-flex;
       align-items: center;
       gap: 0.6rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-family: 'DM Mono', monospace;
-      font-size: 0.8125rem;
-      font-weight: 400;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: var(--accent);
+      color: var(--ink);
+      border: 3px solid rgba(0,0,0,0.55);
+      border-radius: 100px;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.55);
       padding: 0.7rem 1.1rem;
-      border-radius: 8px;
       text-decoration: none;
       white-space: nowrap;
-      transition: border-color 0.2s, background 0.2s;
+      transition: transform 0.12s, box-shadow 0.12s;
     }
-    .github-link:hover { border-color: rgba(255,255,255,0.2); background: var(--surface2); }
-    .github-link svg { flex-shrink: 0; opacity: 0.75; }
+    .gh-link:hover { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.55); }
 
     /* ── FOOTER ── */
     footer {
       position: relative;
       z-index: 1;
-      border-top: 1px solid var(--border);
-      padding: 1.75rem 1.5rem;
+      background: var(--ink);
+      padding: 1.75rem 2rem 2.25rem;
+      margin-top: 4rem;
     }
     .footer-inner {
-      max-width: 900px;
+      max-width: 940px;
       margin: 0 auto;
       display: flex;
       align-items: center;
@@ -621,7 +707,7 @@
       gap: 1rem;
     }
     .footer-logo {
-      font-family: 'Syne', sans-serif;
+      font-family: var(--display);
       font-weight: 800;
       font-size: 0.9375rem;
       color: var(--muted);
@@ -629,39 +715,29 @@
       display: flex;
       align-items: center;
       gap: 0.4rem;
-    }
-    .footer-links {
-      display: flex;
-      gap: 1.25rem;
-      list-style: none;
-      flex-wrap: wrap;
-    }
-    .footer-links a {
-      color: var(--muted);
-      font-size: 0.84rem;
-      font-weight: 400;
-      text-decoration: none;
       transition: color 0.2s;
     }
+    .footer-logo:hover { color: var(--text); }
+    .footer-links { display: flex; gap: 1.25rem; list-style: none; flex-wrap: wrap; }
+    .footer-links a { color: var(--muted); font-size: 0.84rem; font-weight: 600; text-decoration: none; transition: color 0.2s; }
     .footer-links a:hover { color: var(--text); }
-    .footer-note {
-      color: var(--muted);
-      font-size: 0.78rem;
-      font-family: 'DM Mono', monospace;
-    }
+    .footer-note { color: var(--led-muted); font-size: 0.75rem; font-family: var(--mono); }
 
     /* ── TOAST ── */
     .toast {
       position: fixed;
       bottom: 2rem; left: 50%;
       transform: translateX(-50%) translateY(0.75rem);
-      background: var(--accent);
-      color: #080c00;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 600;
-      font-size: 0.84rem;
-      padding: 0.55rem 1.125rem;
-      border-radius: 8px;
+      background: var(--pop);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.6rem 1.2rem;
+      border-radius: 9px;
+      border: 3px solid var(--ink);
+      box-shadow: 0 4px 0 var(--ink);
       opacity: 0;
       transition: opacity 0.22s, transform 0.22s;
       pointer-events: none;
@@ -670,13 +746,26 @@
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* ── RESPONSIVE ── */
-    @media (max-width: 640px) {
-      nav { padding: 0.75rem 1rem; }
-      .nav-github span { display: none; }
-      .steps-grid, .access-cards { grid-template-columns: 1fr; }
-      .github-inner { flex-direction: column; }
-      .github-link { width: 100%; justify-content: center; }
+    @media (max-width: 760px) {
+      nav { padding: 0.75rem 1.125rem; }
+      .nav-links { display: none; }
+      .hero { padding: 4rem 1.25rem 3rem; }
+      .mockup-body { grid-template-columns: 1fr; }
+      .mockup-question { border-bottom: 4px solid var(--ink); }
+      .features-inner, .steps, .access-cards { grid-template-columns: 1fr; }
+      .gh-inner { flex-direction: column; text-align: center; }
+      .gh-link { width: 100%; justify-content: center; }
       .footer-inner { flex-direction: column; align-items: center; text-align: center; }
+      .hero-visual::after { left: -0.5rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
 </head>
@@ -684,20 +773,14 @@
 
   <!-- NAV -->
   <nav>
-    <a href="#" class="logo">
-      <span class="logo-dot"></span>
-      QuizHub
-    </a>
+    <a href="#" class="logo"><span class="logo-dot"></span>QuizHub</a>
     <div class="nav-right">
-      <a href="https://github.com/Sakh1l/quizhub" class="nav-github" target="_blank" rel="noopener">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-        </svg>
-        <span>Source code</span>
-      </a>
-      <a href="https://quizhub-cc.fly.dev/admin.html" class="nav-cta" target="_blank" rel="noopener">
-        Launch Admin →
-      </a>
+      <div class="nav-links">
+        <a href="#how-it-works">How it works</a>
+        <a href="#get-started">Get started</a>
+        <a href="https://github.com/Sakh1l/quizhub" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <a href="https://quizhub-cc.fly.dev/admin.html" class="nav-cta" target="_blank" rel="noopener">Launch Admin →</a>
     </div>
   </nav>
 
@@ -705,10 +788,7 @@
 
     <!-- HERO -->
     <section class="hero">
-      <div class="hero-badge">
-        <span class="badge-dot"></span>
-        Live Quiz Platform
-      </div>
+      <div class="hero-badge"><span class="badge-dot"></span>Live Quiz Platform</div>
 
       <h1>Run live quizzes.<br/><em>Instantly.</em></h1>
 
@@ -719,14 +799,42 @@
       <div class="hero-actions">
         <a href="https://quizhub-cc.fly.dev/admin.html" class="btn-primary" target="_blank" rel="noopener">
           Open Admin Panel
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 8h10M9 4l4 4-4 4"/>
-          </svg>
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
         </a>
         <a href="#how-it-works" class="btn-ghost">How it works ↓</a>
       </div>
 
-      <div class="hero-github">
+      <!-- Live session mockup -->
+      <div class="hero-visual" aria-hidden="true">
+        <div class="mockup">
+          <div class="mockup-bar">
+            <div class="mockup-dots"><span></span><span></span><span></span></div>
+            <div class="mockup-session">SESSION <b>QZ-4821</b></div>
+            <span class="live-pill">LIVE</span>
+          </div>
+          <div class="mockup-body">
+            <div class="mockup-question">
+              <div class="mockup-qlabel"><span>Question 3 of 10</span><span class="mockup-timer">00:12</span></div>
+              <h4>Which planet has the most moons in our solar system?</h4>
+              <div class="mockup-options">
+                <div class="mockup-option"><span class="key">A</span> Jupiter</div>
+                <div class="mockup-option selected"><span class="key">B</span> Saturn</div>
+                <div class="mockup-option"><span class="key">C</span> Neptune</div>
+                <div class="mockup-option"><span class="key">D</span> Uranus</div>
+              </div>
+            </div>
+            <div class="mockup-board">
+              <div class="mockup-board-title">Leaderboard</div>
+              <div class="board-row gold"><span class="board-rank">1</span><span class="board-name">Maya</span><span class="board-score">2,840</span><div class="board-bar"><i style="width:92%"></i></div></div>
+              <div class="board-row silver"><span class="board-rank">2</span><span class="board-name">Arjun</span><span class="board-score">2,615</span><div class="board-bar"><i style="width:81%"></i></div></div>
+              <div class="board-row bronze"><span class="board-rank">3</span><span class="board-name">Sam</span><span class="board-score">2,390</span><div class="board-bar"><i style="width:70%"></i></div></div>
+              <div class="board-row"><span class="board-rank">4</span><span class="board-name">Lena</span><span class="board-score">2,120</span><div class="board-bar"><i style="width:58%"></i></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-gh">
         <a href="https://github.com/Sakh1l/quizhub" target="_blank" rel="noopener">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
@@ -734,59 +842,79 @@
           github.com/Sakh1l/quizhub
         </a>
       </div>
+    </section>
 
-      <div class="hero-scroll">
-        <span class="scroll-label">SCROLL</span>
-        <div class="scroll-line"></div>
+    <!-- FEATURE STRIP -->
+    <section class="features">
+      <div class="features-inner">
+        <div class="feature">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+          <h4>Real-time sync</h4><p>Questions, answers, and scores update live for everyone.</p>
+        </div>
+        <div class="feature">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+          <h4>No accounts</h4><p>Participants join with just a session code. Zero sign-up.</p>
+        </div>
+        <div class="feature">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M11 18h2"/></svg>
+          <h4>Any device</h4><p>Works in the browser on phones, tablets, and laptops.</p>
+        </div>
+        <div class="feature">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+          <h4>Open source</h4><p>Built in Go. Inspect, fork, and contribute on GitHub.</p>
+        </div>
       </div>
     </section>
 
     <!-- HOW IT WORKS -->
     <section class="section" id="how-it-works">
-      <div class="section-label">// How it works</div>
-      <h2 class="section-title">Up and running<br/>in four steps</h2>
-      <p class="section-sub">From zero to live quiz in under two minutes.</p>
+      <div class="section-inner">
+        <div class="section-label">// How it works</div>
+        <h2 class="section-title">Up and running in four steps</h2>
+        <p class="section-sub">From zero to live quiz in under two minutes.</p>
 
-      <div class="steps-grid">
-        <div class="step-card">
-          <div class="step-num">01 —</div>
-          <div class="step-icon">🔐</div>
-          <h3>Sign in as admin</h3>
-          <p>Open the admin panel and enter the access code to unlock the full host dashboard.</p>
-        </div>
-        <div class="step-card">
-          <div class="step-num">02 —</div>
-          <div class="step-icon">📝</div>
-          <h3>Create your quiz</h3>
-          <p>Add questions, answer choices, and configure session settings before going live.</p>
-        </div>
-        <div class="step-card">
-          <div class="step-num">03 —</div>
-          <div class="step-icon">🚀</div>
-          <h3>Share &amp; go live</h3>
-          <p>Start the session and share the session code — participants join from any device instantly.</p>
-        </div>
-        <div class="step-card">
-          <div class="step-num">04 —</div>
-          <div class="step-icon">🏆</div>
-          <h3>See live results</h3>
-          <p>Scores update in real time. The leaderboard shows rankings after each round.</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div class="step-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></div>
+            <h3>Sign in as admin</h3>
+            <p>Open the admin panel and enter the access code to unlock the full host dashboard.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div class="step-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+            <h3>Create your quiz</h3>
+            <p>Add questions, answer choices, and configure session settings before going live.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div class="step-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/></svg></div>
+            <h3>Share &amp; go live</h3>
+            <p>Start the session and share the session code — participants join from any device instantly.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">04</div>
+            <div class="step-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M17 4h3a1 1 0 011 1 5 5 0 01-5 5M7 4H4a1 1 0 00-1 1 5 5 0 005 5"/><path d="M17 4v5a5 5 0 01-10 0V4h10z"/></svg></div>
+            <h3>See live results</h3>
+            <p>Scores update in real time. The leaderboard shows rankings after each round.</p>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- ACCESS -->
-    <section class="access-section" id="get-started">
-      <div class="access-inner">
+    <section class="section access-section" id="get-started">
+      <div class="section-inner">
         <div class="section-label">// Get started</div>
-        <h2 class="section-title" style="margin-bottom: 0.5rem;">Access the app</h2>
+        <h2 class="section-title">Access the app</h2>
         <p class="section-sub">Choose your role and follow the steps below.</p>
 
         <div class="access-cards">
 
           <!-- Admin card -->
           <div class="access-card featured">
-            <div class="card-icon green">🛠️</div>
+            <div class="access-tag">Admin</div>
+            <div class="card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>
             <h3>Admin / Host</h3>
             <p>Create and run quizzes, manage sessions, and view live results from the host dashboard.</p>
 
@@ -798,46 +926,42 @@
               <button class="copy-btn" id="copy-btn" onclick="copyCode()">Copy</button>
             </div>
 
-            <a href="https://quizhub-cc.fly.dev/admin.html" class="launch-btn" target="_blank" rel="noopener">
+            <a href="https://quizhub-cc.fly.dev/admin.html" class="card-btn primary" target="_blank" rel="noopener">
               Open Admin Panel
-              <svg width="14" height="14" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2.5 7.5h10M9 3.5l4 4-4 4"/>
-              </svg>
+              <svg width="14" height="14" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5h10M9 3.5l4 4-4 4"/></svg>
             </a>
 
             <ul class="checklist">
-              <li><span class="check">✓</span><span>Click <strong style="color:var(--text);font-weight:500;">Open Admin Panel</strong> above</span></li>
-              <li><span class="check">✓</span><span>Enter access code <code>1234</code> when prompted</span></li>
-              <li><span class="check">✓</span><span>Create a quiz or resume an existing session</span></li>
-              <li><span class="check">✓</span><span>Share the session code with participants and go live</span></li>
+              <li><span class="tick">✓</span><span>Click <strong>Open Admin Panel</strong> above</span></li>
+              <li><span class="tick">✓</span><span>Enter access code <code>1234</code> when prompted</span></li>
+              <li><span class="tick">✓</span><span>Create a quiz or resume an existing session</span></li>
+              <li><span class="tick">✓</span><span>Share the session code with participants and go live</span></li>
             </ul>
           </div>
 
           <!-- Participant card -->
           <div class="access-card">
-            <div class="card-icon gray">🎮</div>
+            <div class="card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
             <h3>Participant</h3>
             <p>Joining is instant. No account or sign-up required — just a session code from your host.</p>
 
             <div class="code-block">
               <div>
                 <div class="code-label">App URL</div>
-                <div style="font-family:'DM Mono',monospace; font-size:0.84rem; color:var(--text); margin-top:3px; font-weight:400;">quizhub-cc.fly.dev</div>
+                <div class="code-url">quizhub-cc.fly.dev</div>
               </div>
             </div>
 
-            <a href="https://quizhub-cc.fly.dev" class="join-btn" target="_blank" rel="noopener">
+            <a href="https://quizhub-cc.fly.dev" class="card-btn secondary" target="_blank" rel="noopener">
               Join a Quiz
-              <svg width="14" height="14" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2.5 7.5h10M9 3.5l4 4-4 4"/>
-              </svg>
+              <svg width="14" height="14" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5h10M9 3.5l4 4-4 4"/></svg>
             </a>
 
             <ul class="checklist">
-              <li><span class="arr">→</span><span>Click <strong style="color:var(--text);font-weight:500;">Join a Quiz</strong> above</span></li>
-              <li><span class="arr">→</span><span>Enter the session code shared by your host</span></li>
-              <li><span class="arr">→</span><span>Pick a display name and wait for the session to start</span></li>
-              <li><span class="arr">→</span><span>Answer questions and watch the live leaderboard</span></li>
+              <li><span class="tick">→</span><span>Click <strong>Join a Quiz</strong> above</span></li>
+              <li><span class="tick">→</span><span>Enter the session code shared by your host</span></li>
+              <li><span class="tick">→</span><span>Pick a display name and wait for the session to start</span></li>
+              <li><span class="tick">→</span><span>Answer questions and watch the live leaderboard</span></li>
             </ul>
           </div>
 
@@ -846,13 +970,13 @@
     </section>
 
     <!-- GITHUB CALLOUT -->
-    <section class="github-section">
-      <div class="github-inner">
-        <div class="github-text">
+    <section class="gh-callout">
+      <div class="gh-inner">
+        <div>
           <h3>Open source</h3>
           <p>QuizHub is built in Go. Read the code, file issues, or contribute on GitHub.</p>
         </div>
-        <a href="https://github.com/Sakh1l/quizhub" class="github-link" target="_blank" rel="noopener">
+        <a href="https://github.com/Sakh1l/quizhub" class="gh-link" target="_blank" rel="noopener">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
           </svg>
@@ -905,22 +1029,38 @@
       });
     });
 
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // scroll-in reveal
     const io = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
+          entry.target.style.translate = '0 0';
           io.unobserve(entry.target);
         }
       });
     }, { threshold: 0.08 });
 
-    document.querySelectorAll('.step-card, .access-card').forEach((el, i) => {
+    document.querySelectorAll('.step, .access-card, .feature').forEach((el, i) => {
+      if (reduceMotion) return;
       el.style.opacity = '0';
-      el.style.transform = 'translateY(22px)';
-      el.style.transitionDelay = `${i * 0.07}s`;
+      el.style.translate = '0 22px';
+      el.style.transitionProperty = 'opacity, translate, transform, box-shadow';
+      el.style.transitionDuration = '0.55s, 0.55s, 0.15s, 0.15s';
+      el.style.transitionDelay = `${(i % 4) * 0.07}s, ${(i % 4) * 0.07}s, 0s, 0s`;
       io.observe(el);
     });
+
+    // live countdown in the hero mockup
+    const timerEl = document.querySelector('.mockup-timer');
+    if (timerEl && !reduceMotion) {
+      let t = 12;
+      setInterval(() => {
+        t = t <= 1 ? 15 : t - 1;
+        timerEl.textContent = '00:' + String(t).padStart(2, '0');
+      }, 1000);
+    }
   </script>
 
 </body>
